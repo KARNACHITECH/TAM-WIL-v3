@@ -1,0 +1,122 @@
+<!-- show details of an Event -->
+<div class="container">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="panel panel-primary table-striped top5">
+                    <div class="panel-heading">
+                        <h1>{{event.title}} - {{'tickets' | translate}}
+                    <button ng-if="event._id" ng-click="$state.go('event.edit', {id: event._id})" class="btn btn-success">
+                        <span class="fa fa-gear vcenter"></span>
+                        {{'Edit event' | translate}}
+                    </button>
+                    &nbsp;
+                    <button ng-if="event._id" ng-click="openQuickAddTicket()" class="btn btn-success">
+                        <span class="fa fa-user-plus vcenter"></span>
+                        {{'Quick add ticket' | translate}}
+                    </button>
+                    <span>
+                    <span class="label label-info vcenter pull-right">{{'Attendees:' | translate}} {{countAttendees}}</span>
+                    &nbsp;
+                    <span class="label label-warning vcenter pull-right registered-counter">{{'Registered:' | translate}} {{((event.tickets || []) | registeredFilter).length}}</span>
+                    </span>
+                </h1>
+                    </div>
+                    <div class="panel-body">
+                        <div>
+                            <div style="float:left;">
+                                <form class="form-inline">
+                                    <div class="form-group">
+                                        <label for="query-tickets">{{'Search:' | translate}}</label>
+                                        <input eventman-focus type="text" id="query-tickets" class="form-control query-input" placeholder="{{'Name or email or key:value' | translate}}" ng-model="query" ng-model-options="{debounce: 350}" esc-key="resetInput()">
+                                    </div>&nbsp;<label>&nbsp;<input type="checkbox" ng-model="registeredFilterOptions.all" /> {{'Show cancelled tickets' | translate}}</label>
+                                </form>
+                            </div>
+                            <div style="float:right;">
+                                <span style="color:#9e9e9e;">({{filteredLength}} {{'filtered item/s' | translate}})</span>&nbsp;
+                                <a download="eventman.csv" ng-href="{{downloadURL}}" class="btn btn-primary" ng-class="{disabled: !filteredLength}"><span class="fa fa-download"></span> {{'export CSV' | translate}}</a>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+                        <uib-pagination ng-model="currentPage" total-items="filteredLength" items-per-page="itemsPerPage"
+                                    direction-links="false" boundary-links="true" boundary-link-numbers="true" max-size="maxPaginationSize">
+                        </uib-pagination>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th class="text-right nowrap">#</th>
+                                    <th class="nowrap"><a ng-click="updateOrded('name')" href=""><i class="fa fa-caret-up"></i></a>{{'Name' | translate}}<a ng-click="updateOrded('-name')" href=""><i class="fa fa-caret-down"></i></a> <a ng-click="updateOrded('surname')" href=""><i class="fa fa-caret-up"></i></a>{{'Surname' | translate}}<a ng-click="updateOrded('-surname')" href=""><i class="fa fa-caret-down"></i></a></th>
+                                    <th class="text-center nowrap"><a ng-click="updateOrded('-attended')" href=""><i class="fa fa-caret-up"></i></a>{{'Attended' | translate}}<a ng-click="updateOrded('attended')" href=""><i class="fa fa-caret-down"></i></a></th>
+                                    <th class="text-center nowrap" ng-repeat="col in customFields">
+                                        <a ng-click="updateOrded(col.key)" href=""><i class="fa fa-caret-up"></i></a>{{col.label | translate}}<a ng-click="updateOrded('-' + col.key)" href=""><i class="fa fa-caret-down"></i></a>
+                                    </th>
+                                    <th class="text-center nowrap">{{'Delete' | translate}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ticket in shownItems">
+                                    <td class="text-right">{{$index + 1 + ((currentPage-1)*itemsPerPage)}}</td>
+                                    <td>
+                                        <span>
+                                            <strong>
+                                                <a ui-sref="event.ticket.edit({id: event._id, ticket_id: ticket._id})"><span>{{ticket.name}}</span>&nbsp;<span>{{ticket.surname}}</span></a>
+                                            </strong>
+                                        </span>
+                                        <span ng-if="ticket.email">&nbsp;&lt;{{ticket.email}}&gt;</span><span ng-if="ticket.cancelled">&nbsp;({{'cancelled' | translate}})</span>
+                                        <p ng-if="ticket.company || ticket['job title']"><i ng-if="ticket['job title']">{{ticket['job title']}}</i><span ng-if="ticket.company && ticket['job title']">&nbsp;@&nbsp;</span><i ng-if="ticket.company">{{ticket.company}}</i></p>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-link" reset-focus name="switch-attended" ng-click="setTicketAttributeAndRefocus(ticket, 'attended', !ticket.attended)"><span class="fa {{(ticket.attended) && 'fa-check-circle text-success' || 'fa-times-circle text-danger'}}"></span></button>
+                                    </td>
+                                    <td class="text-center" ng-repeat="col in customFields">
+                                        <span ng-if="col.type == 'boolean'">
+                                            <button class="btn btn-link" ng-click="setTicketAttribute(ticket, col.key, !ticket[col.key])"><span class="fa {{(ticket[col.key]) && 'fa-check-circle text-success' || 'fa-times-circle text-danger'}}"></span></button>
+                                        </span>
+                                        <span ng-if="col.type != 'boolean'">
+                                            {{ticket[col.key]}}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button ng-click="deleteTicket(ticket)" type="button" class="btn btn-link fa fa-trash"></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <uib-pagination ng-model="currentPage" total-items="filteredLength" items-per-page="itemsPerPage"
+                                    direction-links="false" boundary-links="true" boundary-link-numbers="true" max-size="maxPaginationSize">
+                        </uib-pagination>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="panel panel-info top5">
+                    <div class="panel-heading"><h1>{{'Unregistered persons' | translate}}</h1></div>
+                    <div class="panel-body small-table">
+                        <table class="table table-striped table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>{{'Person' | translate}}</th>
+                                    <th class="text-left">{{'Add' | translate}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="person in (query ? allPersons : []) | splittedFilter:query | personRegistered:{event: event, present: false} | limitTo:maxAllPersons">
+                                    <td>
+                                        <strong>{{person.name}} {{person.surname}}</strong>
+                                        <br />
+                                        {{person.email}}
+                                    </td>
+                                    <td class="text-left">
+                                        <button reset-focus ng-click="addTicket(person)" type="button" class="btn btn-link fa fa-user-plus vcenter"></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,228 @@
+<!-- Login and user registration page with modern design -->
+<style>
+.login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    max-width: 900px;
+    width: 100%;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    text-align: center;
+    padding: 30px;
+    margin-bottom: 0;
+}
+
+.login-header h2 {
+    margin: 0;
+    font-weight: 300;
+    font-size: 2.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    padding: 40px;
+}
+
+.form-group-modern {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-control-modern {
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    border-radius: 0;
+    padding: 15px 0;
+    font-size: 16px;
+    background: transparent;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.form-control-modern:focus {
+    border-bottom-color: #4facfe;
+    box-shadow: none;
+    background: transparent;
+    outline: none;
+}
+
+.form-label {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    font-size: 16px;
+    color: #999;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.form-control-modern:focus + .form-label,
+.form-control-modern:not(:placeholder-shown) + .form-label {
+    top: -5px;
+    font-size: 12px;
+    color: #4facfe;
+    font-weight: 500;
+}
+
+.btn-modern {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 15px 40px;
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    width: 100%;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+    color: white;
+}
+
+.btn-register {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    box-shadow: 0 4px 15px rgba(250, 112, 154, 0.3);
+}
+
+.btn-register:hover {
+    box-shadow: 0 6px 20px rgba(250, 112, 154, 0.4);
+    color: white;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-weight: 300;
+    font-size: 1.8rem;
+}
+
+@media (max-width: 768px) {
+    .login-card {
+        margin: 10px;
+    }
+    
+    .form-section {
+        padding: 30px 20px;
+    }
+    
+    .login-header {
+        padding: 20px;
+    }
+    
+    .login-header h2 {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>{{'Welcome to EventMan' | translate}}</h2>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">{{'Manage your events with ease' | translate}}</p>
+        </div>
+        
+        <div class="row" style="margin: 0;">
+            <!-- Login Section -->
+            <div class="col-md-6" style="padding: 0;">
+                <div class="form-section">
+                    <h3 class="section-title">{{'Login' | translate}}</h3>
+                    <form method="POST">
+                        <div class="form-group-modern">
+                            <input type="text" 
+                                   id="username" 
+                                   name="username" 
+                                   ng-model="loginData.username" 
+                                   class="form-control form-control-modern"
+                                   placeholder=" "
+                                   required>
+                            <label for="username" class="form-label">{{'Username or email' | translate}}</label>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   ng-model="loginData.password" 
+                                   class="form-control form-control-modern"
+                                   placeholder=" "
+                                   required>
+                            <label for="password" class="form-label">{{'Password' | translate}}</label>
+                        </div>
+                        
+                        <button type="submit" ng-click="login()" class="btn btn-modern">
+                            {{'Login' | translate}}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Register Section -->
+            <div class="col-md-6" style="padding: 0; border-left: 1px solid #e0e0e0;">
+                <div class="form-section">
+                    <h3 class="section-title">{{'Register' | translate}}</h3>
+                    <form method="POST">
+                        <div class="form-group-modern">
+                            <input type="text" 
+                                   id="new-username" 
+                                   name="new-username" 
+                                   ng-model="newUser.username" 
+                                   class="form-control form-control-modern"
+                                   placeholder=" "
+                                   ng-required="1">
+                            <label for="new-username" class="form-label">{{'Username' | translate}}</label>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <input type="email" 
+                                   id="new-email" 
+                                   name="new-email" 
+                                   ng-model="newUser.email" 
+                                   class="form-control form-control-modern"
+                                   placeholder=" ">
+                            <label for="new-email" class="form-label">{{'Email' | translate}}</label>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <input type="password" 
+                                   id="new-password" 
+                                   name="new-password" 
+                                   ng-model="newUser.password" 
+                                   class="form-control form-control-modern"
+                                   placeholder=" "
+                                   ng-required="1">
+                            <label for="new-password" class="form-label">{{'Password' | translate}}</label>
+                        </div>
+                        
+                        <button type="submit" ng-click="register()" class="btn btn-modern btn-register">
+                            {{'Register' | translate}}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

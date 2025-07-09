@@ -1,0 +1,92 @@
+<!-- show the list of Events -->
+<div class="container">
+    <div class="panel panel-primary table-striped top5">
+        <div class="panel-heading">
+            <h1>{{'Events' | translate}}
+                <button ng-click="$state.go('event.new')" class="btn btn-success" ng-if="hasPermission('event|create')">
+                    <span class="fa fa-calendar vcenter"></span>
+                    {{'Add event' | translate}}
+                </button>
+            </h1>
+        </div>
+        <div class="panel-body">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="query-events">{{'Search:' | translate}}</label>
+                    <input eventman-focus type="text" id="query-events" class="form-control" placeholder="{{'Event title' | translate}}" ng-model="query" ng-model-options="{debounce: 350}">
+                </div>
+                <div class="form-group">
+                    <label for="events-order">Sort by:</label>
+                    <select id="events-order" class="form-control" ng-model="eventsOrderProp">
+                        <option value="title">{{'Title' | translate}}</option>
+                        <option value="-title">{{'Title (descending)' | translate}}</option>
+                        <option value="begin_date">{{'Date' | translate}}</option>
+                        <option value="-begin_date">{{'Date (descending)' | translate}}</option>
+                    </select>
+                </div>
+            </form>
+
+            <div ng-include=" 'modal-confirm-action.html' " class="hidden"></div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th><strong>{{'Event' | translate}}</strong></th>
+                        <th ng-if="hasPermission('event|update')" class="hcenter"><strong>{{'Attendees / Registered' | translate}}</strong></th>
+                        <th class="hcenter"><strong>{{'Tickets' | translate}}</strong></th>
+                        <th ng-if="hasPermission('event|update') || hasPermission('event|delete')" class="hcenter"><strong>{{'Actions' | translate}}</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="event in events | splittedFilter:query | orderBy:eventsOrderProp">
+                        <td class="vtop">
+                            <span class="vtop">
+                                <h2 class="vtop">
+                                    <a ui-sref="event.edit({id: event._id})" ng-if="hasPermission('event|update')">{{event.title}}</a>
+                                    <a ui-sref="event.view({id: event._id})" ng-if="!hasPermission('event|update')">{{event.title}}</a>
+                                </h2>
+                            </span>
+                            <div ng-if="event.tagline"><em>{{event.tagline}}</em></div>
+                            <div ng-if="event.summary"><em>{{event.summary}}</em></div>
+                            <div ng-if="event.begin_date || event.end_date || event.where" class="top5">
+                                <div ng-if="event.where">{{event.where}}</div>
+                                <span ng-if="event.begin_date">{{'Begins:' | translate}} {{event.begin_date | date:'fullDate'}} {{event.begin_time | date:'HH:mm'}}<br/></span>
+                                <span ng-if="event.end_date">{{'Ends:' | translate}} {{event.end_date | date:'fullDate'}} {{event.end_time | date:'HH:mm'}}</span>
+                            </div>
+                        </td>
+                        <td ng-if="hasPermission('event:tickets-all|read')" class="hcenter">
+                            <p><span ng-init="attendeesNr = event.total_attendees || 0">{{attendeesNr}}</span> / {{event.tickets_sold || 0}} ({{((attendeesNr / (event.tickets_sold || 0) * 100) || 0).toFixed()}}%)</p>
+                        </td>
+                        <td class="vtop">
+                            <div ng-if="hasPermission('event:tickets-all|create')" class="top5 hcenter"><button ng-click="$state.go('event.ticket.new', {id: event._id})" ng-class="{min150: true, btn: true, 'btn-success': true, disabled: event.no_tickets_for_sale}" type="button" title="{{'Join this event' | translate}}"><span class="fa fa-user-plus vcenter"></span> {{'Join this event' | translate}}</button></div>
+                            <div ng-if="hasPermission('ticket|update')" class="top5 hcenter"><button ng-click="$state.go('event.tickets', {id: event._id})" class="min150 btn btn-primary" type="button" title="{{'Manage tickets' | translate}}"><span class="fa fa-ticket"></span> {{'Manage tickets' | translate}}</button></div>
+                            <div class="top5 hcenter" ng-if="event.number_of_tickets">{{event.number_of_tickets}} {{'tickets' | translate}}, {{event.number_of_tickets - (event.tickets_sold || 0)}} {{'still available' | translate}}</div>
+                            <div class="top5 hcenter" ng-if="event.ticket_sales_begin_date || event.ticket_sales_end_date || event.ticket_sales_begin_time || event.ticket_sales_end_time">
+                                <strong>{{'Tickets for sale:' | translate}}</strong>
+                                <span ng-if="event.ticket_sales_begin_date || event.ticket_sales_begin_time">
+                                    <br />
+                                    {{'from' | translate}}<span ng-if="event.ticket_sales_begin_date"> {{event.ticket_sales_begin_date | date:'fullDate'}}</span><span ng-if="event.ticket_sales_begin_time"> {{event.ticket_sales_begin_time | date:'HH:mm'}}</span>
+                                </span>
+                                <span ng-if="event.ticket_sales_end_date || event.ticket_sales_end_time">
+                                    <br />
+                                    {{'until' | translate}}<span ng-if="event.ticket_sales_end_date"> {{event.ticket_sales_end_date | date:'fullDate'}}</span><span ng-if="event.ticket_sales_end_time"> {{event.ticket_sales_end_time | date:'HH:mm'}}</span>
+                                </span>
+                            </div>
+                        </td>
+                        <td ng-if="hasPermission('event|update') || hasPermission('event|delete')" class="vtop">
+                            <div ng-if="hasPermission('event|update')" class="top5 hcenter"><button ng-click="$state.go('event.edit', {id: event._id})" type="button" class="min150 btn btn-warning" title="{{'Edit event' | translate}}"><span class="fa fa-cog"></span> {{'Edit event' | translate}}</button></div>
+                            <div ng-if="hasPermission('event|delete')" class="top5 hcenter bottom5" id="delete-event" uib-dropdown>
+                                <button type="button" class="min150 btn btn-danger" title="{{'Delete' | translate}}" uib-dropdown-toggle>
+                                    <span class="fa fa-trash"></span> {{'Delete' | translate}} <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="delete-event">
+                                    <li role="menuitem"><a href="#" ng-click="deleteEvent(event._id)">{{'Delete event' | translate}}</a></li>
+                                    <li role="menuitem"><a href="#" ng-click="deleteAllTickets(event._id)">{{'Delete all tickets in event' | translate}}</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
